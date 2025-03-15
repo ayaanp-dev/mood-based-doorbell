@@ -255,7 +255,7 @@ export default function Home() {
                   )}
 
                   <p className="text-center text-lg font-medium text-gray-700 mt-4">
-                    What's wrong with your voice? 😃
+                    What is wrong with your voice? 😃
                   </p>
 
                   <div className="flex items-center justify-between w-full mt-8">
