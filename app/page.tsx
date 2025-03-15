@@ -51,34 +51,6 @@ export default function Home() {
   const [isRecordingVoice, setIsRecordingVoice] = useState(false)
   const audioRef = useRef<HTMLAudioElement | null>(null)
 
-  // Simulate mood detection for doorbell button
-  const detectMood = () => {
-    setIsDetecting(true)
-    setDetectionProgress(0)
-
-    // Simulate progress
-    const interval = setInterval(() => {
-      setDetectionProgress((prev) => {
-        if (prev >= 100) {
-          clearInterval(interval)
-          return 100
-        }
-        return prev + 5
-      })
-    }, 50)
-
-    // After "detection" is complete, set a random mood
-    setTimeout(() => {
-      const moods: Mood[] = ["angry", "happy", "sad"]
-      const randomMood = moods[Math.floor(Math.random() * moods.length)]
-      setCurrentMood(randomMood)
-      setMoodHistory((prev) => [randomMood, ...prev].slice(0, 10))
-      setIsDetecting(false)
-      clearInterval(interval)
-      playSound(randomMood)
-    }, 2000)
-  }
-
   // Handle camera capture for mood detection
   const handleCameraCapture = (imageData: string) => {
     setCapturedImage(imageData)
@@ -313,7 +285,6 @@ export default function Home() {
               <TabsContent value="camera" className="mt-6">
                 <div className="space-y-6">
                   <CameraFeed
-                    onCapture={handleCameraCapture}
                     onMoodDetected={handleMoodDetected}
                     isAnalyzing={isAnalyzingCamera}
                   />

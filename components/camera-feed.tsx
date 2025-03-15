@@ -10,20 +10,19 @@ import { cn } from "@/lib/utils"
 type Mood = 'happy' | 'sad' | 'angry';
 
 interface CameraFeedProps {
-  onCapture: (imageData: string) => void
   onMoodDetected: (mood: Mood, confidence: number) => void
   isAnalyzing: boolean
 }
 
-export default function CameraFeed({ onCapture, onMoodDetected, isAnalyzing }: CameraFeedProps) {
+export default function CameraFeed({onMoodDetected, isAnalyzing }: CameraFeedProps) {
   const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [isCameraOn, setIsCameraOn] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [faceDetected, setFaceDetected] = useState(false)
-  const [faceBounds, setFaceBounds] = useState({ x: 0, y: 0, width: 0, height: 0 })
-  const [isModelLoading, setIsModelLoading] = useState(false)
-  const [modelLoaded, setModelLoaded] = useState(true) // Set to true if you're not using face-api.js
+  const [faceBounds] = useState({ x: 0, y: 0, width: 0, height: 0 })
+  const [isModelLoading] = useState(false)
+  const [modelLoaded] = useState(true) // Set to true if you're not using face-api.js
 
   // Start camera
   const startCamera = async () => {
