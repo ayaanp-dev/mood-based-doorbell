@@ -214,7 +214,7 @@ export default function Home() {
             />
           </div>
           <p className="text-xl font-bold text-center text-gray-600 max-w-md">
-            Ring the doorbell and let your mood shine through AI-powered emotion detection. Listen to terrible music.
+            Ring the doorbell and let your mood shine through AI-powered emotion detection. Listen to terrible music. (all insults are just jokes)
           </p>
         </div>
 
@@ -255,7 +255,7 @@ export default function Home() {
                   )}
 
                   <p className="text-center text-lg font-medium text-gray-700 mt-4">
-                    get voice therapy 😃
+                    What's wrong with your voice? 😃
                   </p>
 
                   <div className="flex items-center justify-between w-full mt-8">
@@ -284,7 +284,7 @@ export default function Home() {
                   />
 
                   <p className="text-center text-lg font-medium text-gray-700">
-                    ur so ugly 😃
+                    You look like a rat 😃
                   </p>
 
                   {capturedImage && (
