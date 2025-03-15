@@ -43,19 +43,13 @@ export default function Home() {
   const [insultMessage, setInsultMessage] = useState("")
   const [moodHistory, setMoodHistory] = useState<Mood[]>([])
   const [isMuted, setIsMuted] = useState(false)
-  const [isDetecting, setIsDetecting] = useState(false)
-  const [detectionProgress, setDetectionProgress] = useState(0)
-  const [capturedImage, setCapturedImage] = useState<string | null>(null)
+  const [isDetecting] = useState(false)
+  const [detectionProgress] = useState(0)
+  const [capturedImage] = useState<string | null>(null)
   const [isAnalyzingCamera, setIsAnalyzingCamera] = useState(false)
   const [lastConfidence, setLastConfidence] = useState(0)
   const [isRecordingVoice, setIsRecordingVoice] = useState(false)
   const audioRef = useRef<HTMLAudioElement | null>(null)
-
-  // Handle camera capture for mood detection
-  const handleCameraCapture = (imageData: string) => {
-    setCapturedImage(imageData)
-    setIsAnalyzingCamera(true)
-  }
 
   // Handle mood detection from camera
   const handleMoodDetected = (mood: Mood, confidence: number) => {
