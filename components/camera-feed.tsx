@@ -112,7 +112,7 @@ export default function CameraFeed({ onCapture, onMoodDetected, isAnalyzing }: C
       formData.append("file", blob, "capture.jpg");
   
       // Send to API
-      const response = await fetch("http://localhost:8000/detect-mood", {
+      const response = await fetch("https://mood-based-doorbell-backend.onrender.com/detect-mood", {
         method: "POST",
         body: formData,
       });

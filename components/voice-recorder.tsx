@@ -53,7 +53,7 @@ export default function VoiceRecorder({ isRecording, onRecordingComplete }: Voic
       const formData = new FormData()
       formData.append('file', audioBlob, 'recording.wav')
 
-      const response = await fetch('http://localhost:8000/detect-voice-mood', {
+      const response = await fetch('https://mood-based-doorbell-backend.onrender.com/detect-voice-mood', {
         method: 'POST',
         body: formData,
       })

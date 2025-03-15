@@ -248,7 +248,7 @@ export default function Home() {
             />
           </div>
           <p className="text-xl font-bold text-center text-gray-600 max-w-md">
-            Ring the doorbell and let your mood shine through AI-powered emotion detection
+            Ring the doorbell and let your mood shine through AI-powered emotion detection. Listen to terrible music.
           </p>
         </div>
 

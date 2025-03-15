@@ -3,8 +3,6 @@
 # python
 .venv/
 training_data/
-emotion_model
-emotion_modelMEANS
 
 # dependencies
 /node_modules
