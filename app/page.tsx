@@ -12,6 +12,7 @@ import DoorbellButton from "@/components/doorbell-button"
 import MoodHistory from "@/components/mood-history"
 import InsultPopup from "@/components/insult-popup"
 import CameraFeed from "@/components/camera-feed"
+import VoiceRecorder from "@/components/voice-recorder"
 import { cn } from "@/lib/utils"
 
 // Mood types
@@ -47,6 +48,7 @@ export default function Home() {
   const [capturedImage, setCapturedImage] = useState<string | null>(null)
   const [isAnalyzingCamera, setIsAnalyzingCamera] = useState(false)
   const [lastConfidence, setLastConfidence] = useState(0)
+  const [isRecordingVoice, setIsRecordingVoice] = useState(false)
   const audioRef = useRef<HTMLAudioElement | null>(null)
 
   // Simulate mood detection for doorbell button
@@ -124,24 +126,32 @@ export default function Home() {
 
     setIsRinging(true)
     setRingCount((prev) => prev + 1)
-    detectMood()
+    setIsRecordingVoice(true)
+    setCurrentMood('neutral') // Reset mood while recording
 
-    // Reset ringing state after animation
+    // Start recording process
     setTimeout(() => {
       setIsRinging(false)
     }, 1000)
 
-    // Check if we should show an insult
+    // Show insult if needed
     if (ringCount >= 2) {
       const randomInsult = insults[Math.floor(Math.random() * insults.length)]
       setInsultMessage(randomInsult)
       setShowInsult(true)
 
-      // Hide insult after a few seconds
       setTimeout(() => {
         setShowInsult(false)
       }, 4000)
     }
+  }
+
+  // Add handler for voice mood detection
+  const handleVoiceMoodDetected = (mood: string) => {
+    setIsRecordingVoice(false)
+    setCurrentMood(mood as Mood)
+    setMoodHistory((prev) => [mood as Mood, ...prev].slice(0, 10))
+    playSound(mood as Mood)
   }
 
   // Toggle mute
@@ -185,6 +195,10 @@ export default function Home() {
       )}
     >
       <audio ref={audioRef} />
+      <VoiceRecorder 
+        isRecording={isRecordingVoice}
+        onRecordingComplete={handleVoiceMoodDetected}
+      />
 
       {/* Decorative elements */}
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
@@ -220,7 +234,7 @@ export default function Home() {
                 currentMood === "neutral" && "text-slate-500",
               )}
             />
-            <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600">
+            <h1 className="text-6xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600">
               The Emotional Doorbell
             </h1>
             <Sparkles
@@ -233,8 +247,8 @@ export default function Home() {
               )}
             />
           </div>
-          <p className="text-lg text-center text-gray-600 max-w-md">
-            Ring the doorbell and let your mood shine through our AI-powered emotion detection
+          <p className="text-xl font-bold text-center text-gray-600 max-w-md">
+            Ring the doorbell and let your mood shine through AI-powered emotion detection
           </p>
         </div>
 
@@ -274,6 +288,10 @@ export default function Home() {
                     <MoodDisplay mood={currentMood} confidence={lastConfidence} />
                   )}
 
+                  <p className="text-center text-lg font-medium text-gray-700 mt-4">
+                    get voice therapy 😃
+                  </p>
+
                   <div className="flex items-center justify-between w-full mt-8">
                     <Badge variant="outline" className="text-sm px-3 py-1 bg-white">
                       Rings: {ringCount}
@@ -299,6 +317,10 @@ export default function Home() {
                     onMoodDetected={handleMoodDetected}
                     isAnalyzing={isAnalyzingCamera}
                   />
+
+                  <p className="text-center text-lg font-medium text-gray-700">
+                    ur so ugly 😃
+                  </p>
 
                   {capturedImage && (
                     <Card className="p-6 border-0 shadow-lg bg-white bg-opacity-80 backdrop-blur-md overflow-hidden">

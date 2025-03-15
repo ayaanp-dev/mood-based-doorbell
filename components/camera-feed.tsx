@@ -5,8 +5,9 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Camera, CameraOff, RefreshCw, AlertCircle } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { loadFaceDetectionModels } from "@/lib/face-detection"
-import type { Mood } from "@/app/page"
+
+// Add this with your other imports
+type Mood = 'happy' | 'sad' | 'angry';
 
 interface CameraFeedProps {
   onCapture: (imageData: string) => void
@@ -22,25 +23,7 @@ export default function CameraFeed({ onCapture, onMoodDetected, isAnalyzing }: C
   const [faceDetected, setFaceDetected] = useState(false)
   const [faceBounds, setFaceBounds] = useState({ x: 0, y: 0, width: 0, height: 0 })
   const [isModelLoading, setIsModelLoading] = useState(false)
-  const [modelLoaded, setModelLoaded] = useState(false)
-
-  // Load face detection models on component mount
-  useEffect(() => {
-    async function initModels() {
-      try {
-        setIsModelLoading(true)
-        const success = await loadFaceDetectionModels()
-        setModelLoaded(success)
-        setIsModelLoading(false)
-      } catch (err) {
-        console.error("Error loading face detection models:", err)
-        setError("Failed to load AI models. Please refresh and try again.")
-        setIsModelLoading(false)
-      }
-    }
-
-    initModels()
-  }, [])
+  const [modelLoaded, setModelLoaded] = useState(true) // Set to true if you're not using face-api.js
 
   // Start camera
   const startCamera = async () => {
@@ -87,64 +70,77 @@ export default function CameraFeed({ onCapture, onMoodDetected, isAnalyzing }: C
 
   // Capture frame from video and detect mood
   const captureFrame = async () => {
-    if (videoRef.current && canvasRef.current && isCameraOn) {
-      const video = videoRef.current
-      const canvas = canvasRef.current
-      const context = canvas.getContext("2d")
-
-      if (context) {
-        // Set canvas dimensions to match video
-        canvas.width = video.videoWidth
-        canvas.height = video.videoHeight
-
-        // Draw video frame to canvas
-        context.drawImage(video, 0, 0, canvas.width, canvas.height)
-
-        // Get image data as base64 string
-        const imageData = canvas.toDataURL("image/jpeg")
-        onCapture(imageData)
-
-        // Send image to API for mood detection
-        try {
-          const response = await fetch("/api/detect-mood", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ imageData }),
-          })
-
-          if (!response.ok) {
-            throw new Error("Failed to detect mood")
-          }
-
-          const result = await response.json()
-
-          if (result.faceDetected) {
-            setFaceDetected(true)
-            setFaceBounds(result.boundingBox)
-            onMoodDetected(result.mood, result.confidence)
-
-            // Hide the face detection box after a few seconds
-            setTimeout(() => {
-              setFaceDetected(false)
-            }, 3000)
-          } else {
-            setError("No face detected. Please make sure your face is visible.")
-            setTimeout(() => {
-              setError(null)
-            }, 3000)
-          }
-        } catch (err) {
-          console.error("Error detecting mood:", err)
-          setError("Failed to detect mood. Please try again.")
-          setTimeout(() => {
-            setError(null)
-          }, 3000)
-        }
-      }
+    if (!videoRef.current || !canvasRef.current || !isCameraOn) {
+      return;
     }
-  }
+  
+    try {
+      const video = videoRef.current;
+      const canvas = canvasRef.current;
+      const context = canvas.getContext("2d");
+  
+      if (!context) {
+        throw new Error("Could not get canvas context");
+      }
+  
+      // Set higher resolution for better face detection
+      canvas.width = 1280;  // Higher resolution
+      canvas.height = 720;  // Higher resolution
+  
+      // Wait for the next frame to ensure clear image
+      await new Promise(requestAnimationFrame);
+  
+      // Draw video frame to canvas with image smoothing
+      context.imageSmoothingEnabled = true;
+      context.imageSmoothingQuality = 'high';
+      context.drawImage(video, 0, 0, canvas.width, canvas.height);
+  
+      // Convert canvas to blob with higher quality
+      const blob = await new Promise<Blob>((resolve, reject) => {
+        canvas.toBlob(
+          (b) => {
+            if (b) resolve(b);
+            else reject(new Error("Failed to create blob"));
+          },
+          "image/jpeg",
+          1.0  // Maximum quality
+        );
+      });
+  
+      // Create FormData
+      const formData = new FormData();
+      formData.append("file", blob, "capture.jpg");
+  
+      // Send to API
+      const response = await fetch("http://localhost:8000/detect-mood", {
+        method: "POST",
+        body: formData,
+      });
+  
+      const data = await response.json();
+      
+      if (data.error) {
+        throw new Error(data.error);
+      }
+  
+      if (data.mood) {
+        setFaceDetected(true);
+        onMoodDetected(data.mood as Mood, 1.0);
+        setError(null);
+        
+        setTimeout(() => {
+          setFaceDetected(false);
+        }, 3000);
+      } else {
+        setError("No mood detected. Please try again.");
+      }
+    } catch (err) {
+      console.error("Error in captureFrame:", err);
+      setError(err instanceof Error ? err.message : "Failed to detect mood");
+    } finally {
+      isAnalyzing = false;
+    }
+  };
 
   // Clean up on unmount
   useEffect(() => {

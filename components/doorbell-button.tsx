@@ -68,6 +68,12 @@ export default function DoorbellButton({ isRinging, onRing, disabled = false, mo
     }
   }
 
+  const handleClick = () => {
+    if (!disabled) {
+      onRing()
+    }
+  }
+
   return (
     <div className="flex flex-col items-center justify-center mb-6">
       <div className="relative">
@@ -94,7 +100,7 @@ export default function DoorbellButton({ isRinging, onRing, disabled = false, mo
             ringAnimation && "animate-bounce scale-105",
             disabled && "opacity-70 cursor-not-allowed",
           )}
-          onClick={onRing}
+          onClick={handleClick}
           disabled={disabled}
         >
           <Bell
